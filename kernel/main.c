@@ -18,32 +18,56 @@ extern char end[]; // first address after kernel loaded from ELF file
 int
 main(void)
 {
-  uartearlyinit();
-  kinit1(end, P2V(4*1024*1024)); // phys page allocator
-  kvmalloc();      // kernel page table
-  if (acpiinit()) // try to use acpi for machine info
-    mpinit();      // otherwise use bios MP tables
-  lapicinit();
-  seginit();       // set up segments
-  cprintf("\ncpu%d: starting xv6\n\n", cpu->id);
-  picinit();       // interrupt controller
-  ioapicinit();    // another interrupt controller
-  consoleinit();   // I/O devices & their interrupts
-  uartinit();      // serial port
-  pinit();         // process table
-  tvinit();        // trap vectors
-  binit();         // buffer cache
-  fileinit();      // file table
-  iinit();         // inode cache
-  ideinit();       // disk
-  if(!ismp)
-    timerinit();   // uniprocessor timer
-  startothers();   // start other processors
-  kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
-  pci_scan();
-  userinit();      // first user process
-  // Finish setting up this processor in mpmain.
-  mpmain();
+        int has_uart;
+        {
+                char *p;
+                const int COM1 = 0x3f8;
+                // Turn off the FIFO
+                outb(COM1+2, 0);
+                // 9600 baud, 8 data bits, 1 stop bit, parity off.
+                outb(COM1+3, 0x80);    // Unlock divisor
+                outb(COM1+0, 115200/9600);
+                outb(COM1+1, 0);
+                outb(COM1+3, 0x03);    // Lock divisor, 8 data bits.
+                outb(COM1+4, 0);
+                outb(COM1+1, 0x01);    // Enable receive interrupts.
+                // If status is 0xFF, no serial port.
+                if(inb(COM1+5) == 0xFF) {
+                        has_uart = 0;
+                } else {
+                        has_uart = 1;
+                }
+                // Announce that we're here.
+                for(p="Loading...\n"; *p; p++)
+                        uartputc(*p);
+        }
+
+
+        kinit1(end, P2V(4*1024*1024)); // phys page allocator
+        kvmalloc();      // kernel page table
+        if (acpiinit()) // try to use acpi for machine info
+                mpinit();      // otherwise use bios MP tables
+        lapicinit();
+        seginit();       // set up segments
+        cprintf("\ncpu%d: starting xv6\n\n", cpu->id);
+        picinit();       // interrupt controller
+        ioapicinit();    // another interrupt controller
+        consoleinit();   // I/O devices & their interrupts
+        uartinit();      // serial port
+        pinit();         // process table
+        tvinit();        // trap vectors
+        binit();         // buffer cache
+        fileinit();      // file table
+        iinit();         // inode cache
+        ideinit();       // disk
+        if(!ismp)
+                timerinit();   // uniprocessor timer
+        startothers();   // start other processors
+        kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
+        pci_scan();
+        userinit();      // first user process
+        // Finish setting up this processor in mpmain.
+        mpmain();
 }
 
 // Other CPUs jump here from entryother.S.

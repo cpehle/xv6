@@ -1,14 +1,10 @@
 -include local.mk
 
-ifneq ("$(X64)","")
+
 BITS = 64
 XOBJS = kobj/vm64.o
 XFLAGS = -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
 LDFLAGS = -m elf_x86_64 -nodefaultlibs
-else
-XFLAGS = -m32
-LDFLAGS = -m elf_i386 -nodefaultlibs
-endif
 
 OPT ?= -O0
 

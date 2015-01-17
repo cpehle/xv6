@@ -9,6 +9,15 @@ inb(ushort port)
   return data;
 }
 
+static inline unsigned int
+inl(ushort port)
+{
+  unsigned int data;
+
+  asm volatile("in %1,%0" : "=a" (data) : "d" (port));
+  return data;
+}
+
 static inline void
 insl(int port, void *addr, int cnt)
 {
@@ -20,6 +29,12 @@ insl(int port, void *addr, int cnt)
 
 static inline void
 outb(ushort port, uchar data)
+{
+  asm volatile("out %0,%1" : : "a" (data), "d" (port));
+}
+
+static inline void
+outl(ushort port, unsigned int data)
 {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }

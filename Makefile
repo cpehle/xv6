@@ -23,6 +23,7 @@ OBJS := \
 	kobj/main.o\
 	kobj/mp.o\
 	kobj/acpi.o\
+	kobj/pci.o\
 	kobj/picirq.o\
 	kobj/pipe.o\
 	kobj/proc.o\
@@ -91,7 +92,7 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -ggdb -fno-omit-frame-pointer
+CFLAGS = -std=gnu11 -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -ggdb -fno-omit-frame-pointer
 CFLAGS += -ffreestanding -fno-common -nostdlib -Iinclude -gdwarf-2 $(XFLAGS) $(OPT)
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -gdwarf-2 -Wa,-divide -Iinclude $(XFLAGS)

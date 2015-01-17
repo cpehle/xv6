@@ -1,4 +1,12 @@
 #include "u.h"
+#include "types.h"
+#include "x86.h"
+#include "defs.h"
+#include "pci.h"
+
+/* Configuration method one. */
+static const int pci_address_ioport = 0x0cf8;
+static const int pci_data_ioport = 0x0cfc;
 
 typedef struct pci_bridge_conf {
   u32 base_address_register[2];
@@ -182,12 +190,12 @@ pci_scan()
   for(u8 bus = 0; bus < 255; bus++) {
     for(u8 dev = 0; dev < 32; dev++) {
       pci_conf_t conf = pci_conf_read(bus, dev);
-      if((conf.device_id == 0xff) || (conf.vendor_id == 0xff)) {
+      if((conf.device_id == 0xffff) || (conf.vendor_id == 0xffff)) {
 	continue;
       }
-      cprintf("pci: bus: %x, device id: %x, vendor id: %d\n",
-	      bus, conf.device_id, conf.vendor_id);
-      cprintf("class: %d\n", conf.class_code);
+        cprintf("pci: bus: %x, device id: %x, vendor id: %d\n",
+                bus, conf.device_id, conf.vendor_id);
+        cprintf("class: %d\n", conf.class_code);
     }
   }
 }

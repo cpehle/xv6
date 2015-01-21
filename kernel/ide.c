@@ -35,7 +35,7 @@ idewait(int checkerr)
 {
   int r;
 
-  while(((r = inb(0x1f7)) & (IDE_BSY|IDE_DRDY)) != IDE_DRDY) 
+  while(((r = inb(0x1f7)) & (IDE_BSY|IDE_DRDY)) != IDE_DRDY)
     ;
   if(checkerr && (r & (IDE_DF|IDE_ERR)) != 0)
     return -1;
@@ -105,12 +105,11 @@ ideintr(void)
   // Read data if needed.
   if(!(b->flags & B_DIRTY) && idewait(1) >= 0)
     insl(0x1f0, b->data, 512/4);
-  
   // Wake process waiting for this buf.
   b->flags |= B_VALID;
   b->flags &= ~B_DIRTY;
   wakeup(b);
-  
+
   // Start disk on next buf in queue.
   if(idequeue != 0)
     idestart(idequeue);
@@ -119,7 +118,7 @@ ideintr(void)
 }
 
 //PAGEBREAK!
-// Sync buf with disk. 
+// Sync buf with disk.
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
 void
@@ -141,11 +140,11 @@ iderw(struct buf *b)
   for(pp=&idequeue; *pp; pp=&(*pp)->qnext)  //DOC:insert-queue
     ;
   *pp = b;
-  
+
   // Start disk if necessary.
   if(idequeue == b)
     idestart(b);
-  
+
   // Wait for request to finish.
   while((b->flags & (B_VALID|B_DIRTY)) != B_VALID){
     sleep(b, &idelock);

@@ -36,15 +36,19 @@ main(void)
                         has_uart = 0;
                 } else {
                         has_uart = 1;
-                }
-                // Announce that we're here.
-                for(p="Loading...\n"; *p; p++)
-                        uartputc(*p);
-        }
+                        // Announce that we're here.
+                        for(p="Loading...\n"; *p; p++) {
+                                for(int i = 0; i < 128 && !(inb(COM1+5) & 0x20); i++)
+                                        microdelay(10);
+                                outb(COM1+0, *p);
+                        }
 
+                }
+        }
 
         kinit1(end, P2V(4*1024*1024)); // phys page allocator
         kvmalloc();      // kernel page table
+
         if (acpiinit()) // try to use acpi for machine info
                 mpinit();      // otherwise use bios MP tables
         lapicinit();
@@ -81,8 +85,7 @@ mpenter(void)
 }
 
 // Common CPU setup code.
-static void
-mpmain(void)
+static void mpmain(void)
 {
   cprintf("cpu%d: starting\n", cpu->id);
   idtinit();       // load idt register
@@ -94,8 +97,7 @@ pde_t entrypgdir[];  // For entry.S
 void entry32mp(void);
 
 // Start the non-boot (AP) processors.
-static void
-startothers(void)
+static void startothers(void)
 {
   extern uchar _binary_out_entryother_start[], _binary_out_entryother_size[];
   uchar *code;
@@ -137,7 +139,7 @@ startothers(void)
 #ifndef X64
 // Boot page table used in entry.S and entryother.S.
 // Page directories (and page tables), must start on a page boundary,
-// hence the "__aligned__" attribute.  
+// hence the "__aligned__" attribute.
 // Use PTE_PS in page directory entry to enable 4Mbyte pages.
 __attribute__((__aligned__(PGSIZE)))
 pde_t entrypgdir[NPDENTRIES] = {

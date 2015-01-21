@@ -151,8 +151,7 @@ setupkvm(void)
 // space for scheduler processes.
 //
 // linear map the first 4GB of physical memory starting at 0xFFFFFFFF80000000
-void
-kvmalloc(void)
+void kvmalloc(void)
 {
   int n;
   kpml4 = (pde_t*) kalloc();
